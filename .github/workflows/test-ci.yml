@@ -10,14 +10,16 @@ on:
     branches: [ "main" ]
 
 jobs:
-  runner-job:
+  test:
+    name: Test
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres
+        image: postgres:15.2
         env:
           POSTGRES_PASSWORD: secret
           POSTGRES_USER: root
+          POSTGRES_DB: simple_bank
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -39,9 +41,6 @@ jobs:
         curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz
         sudo mv ./migrate /usr/bin
         whereis migrate
-
-    - name: Create DB
-      run: createdb --username=root --owner=root simple_bank
       
     - name: Connect to DB
       run: make migrateup
