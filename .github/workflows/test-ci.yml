@@ -40,7 +40,10 @@ jobs:
         sudo mv ./migrate /usr/bin
         whereis migrate
 
-    - name: Connect to PostgreSQL
+    - name: Create DB
+      run: createdb --username=root --owner=root simple_bank
+      
+    - name: Connect to DB
       run: make migrateup
 
     - name: Test
