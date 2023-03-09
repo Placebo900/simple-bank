@@ -28,5 +28,6 @@ type Transfer struct {
 	FromAccountID int64     `json:"fromAccountID"`
 	ToAccountID   int64     `json:"toAccountID"`
 	Amount        int64     `json:"amount"`
+	Currency      string    `json:"currency"`
 	CreatedAt     time.Time `json:"createdAt"`
 }

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	db "github.com/Placebo900/simple-bank/db/sqlc"
@@ -48,14 +49,20 @@ func (s *Server) listTransfer(c *gin.Context) {
 }
 
 type transferTxRequest struct {
-	FromAccountID int64 `json:"from_account_id" binding:"required,min=1"`
-	ToAccountID   int64 `json:"to_account_id" binding:"required,min=1"`
-	Amount        int64 `json:"amount" binding:"required,min=0"`
+	FromAccountID int64  `json:"from_account_id" binding:"required,min=1"`
+	ToAccountID   int64  `json:"to_account_id" binding:"required,min=1"`
+	Amount        int64  `json:"amount" binding:"required,min=0"`
+	Currency      string `json:"currency" binding:"required,currency"`
 }
 
 func (s *Server) transferTx(c *gin.Context) {
 	arg := transferTxRequest{}
 	if err := c.BindJSON(&arg); err != nil {
+		c.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err := checkCurrencies(c, s, arg.FromAccountID, arg.ToAccountID, arg.Amount, arg.Currency); err != nil {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
@@ -67,4 +74,26 @@ func (s *Server) transferTx(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, result)
+}
+
+func checkCurrencies(c *gin.Context, s *Server, from, to, amount int64, currency string) error {
+	accFrom, err := s.store.GetAccount(c, from)
+	if err != nil {
+		return err
+	}
+	accTo, err := s.store.GetAccount(c, to)
+	if err != nil {
+		return err
+	}
+
+	if accFrom.Currency != currency {
+		return fmt.Errorf("different currencies from id=%d: want: %s, have: %s", from, currency, accFrom.Currency)
+	}
+	if accTo.Currency != currency {
+		return fmt.Errorf("different currencies from id=%d: want:%s, have:%s", to, currency, accTo.Currency)
+	}
+	if accFrom.Balance < amount {
+		return fmt.Errorf("id=%d balance is lower than amount of transfer: amount:%d, balance:%d", accFrom.ID, amount, accFrom.Balance)
+	}
+	return nil
 }
