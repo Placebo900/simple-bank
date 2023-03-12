@@ -67,7 +67,11 @@ func (s *Server) transferTx(c *gin.Context) {
 		return
 	}
 
-	result, err := s.store.TransferTx(c, db.TransferTxParams(arg))
+	result, err := s.store.TransferTx(c, db.TransferTxParams{
+		FromAccountID: arg.FromAccountID,
+		ToAccountID:   arg.ToAccountID,
+		Amount:        arg.Amount,
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return

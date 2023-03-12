@@ -15,9 +15,9 @@ OFFSET $2;
 
 -- name: CreateTransfer :one
 INSERT INTO transfers (
-  from_account_id, to_account_id, amount, currency
+  from_account_id, to_account_id, amount
 ) VALUES (
-  $1, $2, $3, $4
+  $1, $2, $3
 )
 RETURNING *;
 

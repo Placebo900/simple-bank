@@ -2,10 +2,12 @@ package api
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 
 	db "github.com/Placebo900/simple-bank/db/sqlc"
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 )
 
 type createAccountRequest struct {
@@ -23,6 +25,12 @@ func (s *Server) createAccount(c *gin.Context) {
 	acc, err := s.store.CreateAccount(c,
 		db.CreateAccountParams{Owner: arg.Owner, Balance: 0, Currency: arg.Currency})
 	if err != nil {
+		log.Println(err.(*pq.Error).Code.Name())
+		switch err.(*pq.Error).Code.Name() {
+		case "foreign_key_violation", "unique_violation":
+			c.JSON(http.StatusForbidden, err.Error())
+			return
+		}
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
