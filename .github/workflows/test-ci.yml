@@ -45,7 +45,7 @@ jobs:
         whereis migrate
       
     - name: Run migrations
-      run: make migrateup
+      run: make migrateup1
 
     - name: Test
       run: make test
