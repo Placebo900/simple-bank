@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out code into the Go module directory
+    - name: Check out code
       uses: actions/checkout@v3
 
     - name: Login to Yandex Cloud Container Registry
@@ -21,8 +21,8 @@ jobs:
 
     - name: Build, tag, and push image to Yandex Cloud Container Registry
       env:
-        CR_REGISTRY: epdp7nm84fhu8bgch0j2
-        CR_REPOSITORY: simplebank
+        CR_REGISTRY: crpg67ome0npa29ke1bt
+        CR_REPOSITORY: simpleank-registry
         IMAGE_TAG: ${{ github.sha }}
       run: |
         docker build -t cr.yandex/$CR_REGISTRY/$CR_REPOSITORY:$IMAGE_TAG .
