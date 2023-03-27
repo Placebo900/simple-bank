@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v3
+
     - name: Login to Yandex Cloud Container Registry
       id: login-cr
       uses: yc-actions/yc-cr-login@v1.2.0
