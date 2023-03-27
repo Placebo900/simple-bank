@@ -24,7 +24,7 @@ type CreateEntryParams struct {
 }
 
 func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry, error) {
-	row := q.queryRow(ctx, q.createEntryStmt, createEntry, arg.AccountID, arg.Amount)
+	row := q.db.QueryRowContext(ctx, createEntry, arg.AccountID, arg.Amount)
 	var i Entry
 	err := row.Scan(
 		&i.ID,
@@ -41,7 +41,7 @@ WHERE id = $1
 `
 
 func (q *Queries) DeleteEntry(ctx context.Context, id int64) error {
-	_, err := q.exec(ctx, q.deleteEntryStmt, deleteEntry, id)
+	_, err := q.db.ExecContext(ctx, deleteEntry, id)
 	return err
 }
 
@@ -51,7 +51,7 @@ WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetEntry(ctx context.Context, id int64) (Entry, error) {
-	row := q.queryRow(ctx, q.getEntryStmt, getEntry, id)
+	row := q.db.QueryRowContext(ctx, getEntry, id)
 	var i Entry
 	err := row.Scan(
 		&i.ID,
@@ -69,7 +69,7 @@ FOR NO KEY UPDATE
 `
 
 func (q *Queries) GetEntryForUpdate(ctx context.Context, id int64) (Entry, error) {
-	row := q.queryRow(ctx, q.getEntryForUpdateStmt, getEntryForUpdate, id)
+	row := q.db.QueryRowContext(ctx, getEntryForUpdate, id)
 	var i Entry
 	err := row.Scan(
 		&i.ID,
@@ -93,12 +93,12 @@ type ListEntryParams struct {
 }
 
 func (q *Queries) ListEntry(ctx context.Context, arg ListEntryParams) ([]Entry, error) {
-	rows, err := q.query(ctx, q.listEntryStmt, listEntry, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listEntry, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Entry
+	items := []Entry{}
 	for rows.Next() {
 		var i Entry
 		if err := rows.Scan(
@@ -133,7 +133,7 @@ type UpdateEntryParams struct {
 }
 
 func (q *Queries) UpdateEntry(ctx context.Context, arg UpdateEntryParams) (Entry, error) {
-	row := q.queryRow(ctx, q.updateEntryStmt, updateEntry, arg.ID, arg.Amount)
+	row := q.db.QueryRowContext(ctx, updateEntry, arg.ID, arg.Amount)
 	var i Entry
 	err := row.Scan(
 		&i.ID,

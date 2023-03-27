@@ -22,8 +22,8 @@ jobs:
           POSTGRES_DB: simple_bank
         options: >-
           --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
+          --health-interval 25s
+          --health-timeout 25s
           --health-retries 5
         ports:
           - 5432:5432
@@ -49,3 +49,4 @@ jobs:
 
     - name: Test
       run: make test
+

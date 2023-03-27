@@ -22,7 +22,7 @@ type AddAccountMoneyParams struct {
 }
 
 func (q *Queries) AddAccountMoney(ctx context.Context, arg AddAccountMoneyParams) (Account, error) {
-	row := q.queryRow(ctx, q.addAccountMoneyStmt, addAccountMoney, arg.Amount, arg.ID)
+	row := q.db.QueryRowContext(ctx, addAccountMoney, arg.Amount, arg.ID)
 	var i Account
 	err := row.Scan(
 		&i.ID,
@@ -50,7 +50,7 @@ type CreateAccountParams struct {
 }
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
-	row := q.queryRow(ctx, q.createAccountStmt, createAccount, arg.Owner, arg.Balance, arg.Currency)
+	row := q.db.QueryRowContext(ctx, createAccount, arg.Owner, arg.Balance, arg.Currency)
 	var i Account
 	err := row.Scan(
 		&i.ID,
@@ -68,7 +68,7 @@ WHERE id = $1
 `
 
 func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
-	_, err := q.exec(ctx, q.deleteAccountStmt, deleteAccount, id)
+	_, err := q.db.ExecContext(ctx, deleteAccount, id)
 	return err
 }
 
@@ -78,7 +78,7 @@ WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
-	row := q.queryRow(ctx, q.getAccountStmt, getAccount, id)
+	row := q.db.QueryRowContext(ctx, getAccount, id)
 	var i Account
 	err := row.Scan(
 		&i.ID,
@@ -97,7 +97,7 @@ FOR NO KEY UPDATE
 `
 
 func (q *Queries) GetAccountForUpdate(ctx context.Context, id int64) (Account, error) {
-	row := q.queryRow(ctx, q.getAccountForUpdateStmt, getAccountForUpdate, id)
+	row := q.db.QueryRowContext(ctx, getAccountForUpdate, id)
 	var i Account
 	err := row.Scan(
 		&i.ID,
@@ -111,23 +111,25 @@ func (q *Queries) GetAccountForUpdate(ctx context.Context, id int64) (Account, e
 
 const listAccount = `-- name: ListAccount :many
 SELECT id, owner, balance, currency, created_at FROM accounts
+WHERE owner = $1
 ORDER BY id
-LIMIT $1
-OFFSET $2
+LIMIT $2
+OFFSET $3
 `
 
 type ListAccountParams struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
+	Owner  string `json:"owner"`
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
 }
 
 func (q *Queries) ListAccount(ctx context.Context, arg ListAccountParams) ([]Account, error) {
-	rows, err := q.query(ctx, q.listAccountStmt, listAccount, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listAccount, arg.Owner, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Account
+	items := []Account{}
 	for rows.Next() {
 		var i Account
 		if err := rows.Scan(
@@ -163,7 +165,7 @@ type UpdateAccountParams struct {
 }
 
 func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) (Account, error) {
-	row := q.queryRow(ctx, q.updateAccountStmt, updateAccount, arg.ID, arg.Balance)
+	row := q.db.QueryRowContext(ctx, updateAccount, arg.ID, arg.Balance)
 	var i Account
 	err := row.Scan(
 		&i.ID,

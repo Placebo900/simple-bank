@@ -1,8 +1,11 @@
 package util
 
 import (
+	"fmt"
 	"math/rand"
 	"strings"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 var alphabet string = "abcdefghijklmnopqrstuvwxyz"
@@ -29,7 +32,27 @@ func RandomMoney() int64 {
 }
 
 func RandomCurrency() string {
-	currencies := []string{"EUR", "USD", "CAD"}
+	currencies := []string{EUR, USD, CAD}
 	n := len(currencies)
 	return currencies[rand.Intn(n)]
+}
+
+func RandomEmail() string {
+	return fmt.Sprintf("%s@email.com", RandomOwner())
+}
+
+func HashPassword(password string) (string, error) {
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+	if err != nil {
+		return "", fmt.Errorf("can't hash a password: %w", err)
+	}
+	err = CheckPassword(password, string(hashPassword))
+	if err != nil {
+		return "", fmt.Errorf("invaild hashing: %w", err)
+	}
+	return string(hashPassword), nil
+}
+
+func CheckPassword(password string, hashPassword string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashPassword), []byte(password))
 }
