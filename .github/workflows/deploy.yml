@@ -12,7 +12,7 @@ jobs:
     steps:
     - name: Login to Yandex Cloud Container Registry
       id: login-cr
-      uses: yc-actions/yc-cr-login@v2
+      uses: yc-actions/yc-cr-login@v1.2.0
       with:
         yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
 
