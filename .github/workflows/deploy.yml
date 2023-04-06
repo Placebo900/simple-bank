@@ -23,7 +23,7 @@ jobs:
       uses: yc-actions/yc-lockbox@v1
       with:
         yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
-        secret-id: e6qe55mkmjhunbtfqooi
+        secret-id: e6q385l1muascd5rhisa
 
     - name: Build, tag, and push image to Yandex Cloud Container Registry
       env:
