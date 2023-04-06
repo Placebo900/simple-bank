@@ -19,8 +19,11 @@ jobs:
       with:
         yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
     
-    - name: Load secrets and save to add.env file
-      run: yc lockbox payload get simple_bank --format json | jq -r '.entries|map("\(.key)=\(.text_value)")|.[]' > app.env
+    - name: Yandex Cloud Lockbox
+      uses: yc-actions/yc-lockbox@v1
+      with:
+        yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+        secret-id: e6qe55mkmjhunbtfqooi
 
     - name: Build, tag, and push image to Yandex Cloud Container Registry
       env:
