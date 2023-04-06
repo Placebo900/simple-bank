@@ -18,6 +18,9 @@ jobs:
       uses: yc-actions/yc-cr-login@v1.2.0
       with:
         yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+    
+    - name: Load secrets and save to add.env file
+      run: yc lockbox payload get simple_bank --format json | jq -r '.entries|map("\(.key)=\(.text_value)")|.[]' > app.env
 
     - name: Build, tag, and push image to Yandex Cloud Container Registry
       env:
